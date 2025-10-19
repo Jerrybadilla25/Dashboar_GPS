@@ -6,11 +6,11 @@ import { getCurrentUser } from './authActions';
 
 export async function getAllLocations() {
   try {
-    console.log('🔍 Obteniendo todas las ubicaciones...');
+    //console.log('🔍 Obteniendo todas las ubicaciones...');
     
     // Verificar autenticación
     const user = await getCurrentUser();
-    console.log('Usuario actual:', user);
+    //console.log('Usuario actual:', user);
     
     if (!user) {
       throw new Error('No autenticado');
@@ -20,7 +20,7 @@ export async function getAllLocations() {
     console.log('✅ Conectado a la base de datos');
     
     const locations = await LocationService.getAllLocations();
-    console.log('📍 Ubicaciones obtenidas:', locations?.length);
+    //console.log('📍 Ubicaciones obtenidas:', locations?.length);
     
     // Convertir a objetos planos
     return JSON.parse(JSON.stringify({ 
@@ -38,7 +38,7 @@ export async function getAllLocations() {
 
 export async function getRecentLocations(hours = 24) {
   try {
-    console.log(`🔍 Obteniendo ubicaciones recientes (últimas ${hours} horas)...`);
+    //console.log(`🔍 Obteniendo ubicaciones recientes (últimas ${hours} horas)...`);
     
     const user = await getCurrentUser();
     const emailId = user.email
@@ -49,7 +49,7 @@ export async function getRecentLocations(hours = 24) {
     await connectDB();
     console.log('✅ Conectado a la base de datos');
     const locations = await LocationService.getRecentLocations(hours, emailId);
-    console.log('📍 Ubicaciones recientes obtenidas:', locations?.length);
+    //console.log('📍 Ubicaciones recientes obtenidas:', locations?.length);
     
     return JSON.parse(JSON.stringify({ 
       success: true, 
@@ -66,7 +66,7 @@ export async function getRecentLocations(hours = 24) {
 
 export async function getActiveUsers() {
   try {
-    console.log('🔍 Obteniendo usuarios activos...');
+    //console.log('🔍 Obteniendo usuarios activos...');
     
     const user = await getCurrentUser();
     if (!user) {
@@ -77,7 +77,7 @@ export async function getActiveUsers() {
     console.log('✅ Conectado a la base de datos');
 
     const users = await LocationService.getActiveUsers();
-    console.log('👥 Usuarios activos obtenidos:', users?.length);
+    //console.log(users);
     
     return JSON.parse(JSON.stringify({ 
       success: true, 
@@ -85,6 +85,31 @@ export async function getActiveUsers() {
     }));
   } catch (error) {
     console.error('❌ Error en getActiveUsers:', error);
+    return JSON.parse(JSON.stringify({ 
+      success: false, 
+      error: error.message 
+    }));
+  }
+}
+
+export async function getLatestLocation() {
+  try {
+    const user = await getCurrentUser();
+    const emailId = user.email;
+    
+    if (!user) {
+      throw new Error('No autenticado');
+    }
+
+    await connectDB();
+    const location = await LocationService.getLatestLocation(emailId);
+    
+    return JSON.parse(JSON.stringify({ 
+      success: true, 
+      data: location 
+    }));
+  } catch (error) {
+    console.error('❌ Error en getLatestLocation:', error);
     return JSON.parse(JSON.stringify({ 
       success: false, 
       error: error.message 

@@ -3,7 +3,7 @@ import {
   getActiveUsers,
 } from "@/lib/actions/locationActions";
 import { getCurrentUser, logoutUser } from "@/lib/actions/authActions";
-import MapComponent from "@/components/MapComponent";
+import DashboardClient from "@/components/DashboardClient";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
@@ -11,27 +11,17 @@ export default async function DashboardPage() {
 
   const user = await getCurrentUser();
 
-  console.log("👤 Usuario en dashboard:", user);
-
   // Redirigir si no está autenticado
   if (!user) {
-    console.log("❌ Usuario no autenticado, redirigiendo a login...");
     redirect("/login");
   }
 
   // Obtener datos del servidor
-  console.log("📊 Obteniendo datos del servidor...");
   const locationsResult = await getRecentLocations(24);
   const usersResult = await getActiveUsers();
 
-  console.log("📍 Resultado de ubicaciones:", locationsResult);
-  console.log("👥 Resultado de usuarios:", usersResult);
-
   const locations = locationsResult.success ? locationsResult.data : [];
   const users = usersResult.success ? usersResult.data : [];
-
-  console.log(`📍 ${locations.length} ubicaciones cargadas`);
-  console.log(`👥 ${users.length} usuarios cargados`);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -68,17 +58,16 @@ export default async function DashboardPage() {
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold">Tu dispositivo</h3>
-            <p className="text-sm text-gray-600">{user.deviceId}</p>
+            {users.map((userItem) => (
+              <p key={userItem._id} className="text-sm text-gray-600">
+                {userItem.deviceId}
+              </p>
+            ))}
           </div>
         </div>
 
-        {/* Mapa */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">
-            Mapa en tiempo real ({locations.length} ubicaciones)
-          </h3>
-          <MapComponent locations={locations} />
-        </div>
+        {/* Mapa y Botón de cambio de vista - Controlado por DashboardClient */}
+        <DashboardClient initialLocations={locations} />
 
         {/* Tabla de ubicaciones para debugging */}
         <div className="bg-white p-6 rounded-lg shadow-lg mt-6 border border-gray-200">
